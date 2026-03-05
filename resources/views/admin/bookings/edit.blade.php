@@ -1,14 +1,14 @@
 {{-- resources/views/bookings/edit.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Edit Booking #' . str_pad($booking->id, 6, '0', STR_PAD_LEFT) . ' - EO Tour')
+@section('title', 'Edit Booking #' . ($booking->id) . ' - EO Tour')
 
 @section('content')
 
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
     <h4 class="fw-bold mb-0">
         Edit Booking
-        <span class="text-primary ms-2">#{{ str_pad($booking->id, 6, '0', STR_PAD_LEFT) }}</span>
+        <span class="text-primary ms-2">#{{ $booking->id}}</span>
     </h4>
     <div class="d-flex gap-2">
         <a href="{{ route('admin.bookings.show', $booking->id) }}" class="btn btn-outline-secondary">
@@ -71,9 +71,10 @@
                     <label for="tour_id" class="form-label fw-medium">Tour <span class="text-danger">*</span></label>
                     <select name="tour_id" id="tour_id"
                             class="form-select form-select-lg @error('tour_id') is-invalid @enderror" required>
-                        <option value="">-- Select Tour --</option>
+                        <option value="" data-price="0">-- Select Tour --</option>
                         @foreach ($tours as $tour)
                             <option value="{{ $tour->id }}"
+                                    data-price="{{ $tour->price ?? 0 }}"
                                     {{ old('tour_id', $booking->tour_id) == $tour->id ? 'selected' : '' }}>
                                 {{ $tour->name }} (${{ number_format($tour->price ?? 0, 2) }})
                             </option>
@@ -119,17 +120,9 @@
                 </div>
             </div>
 
-            <!-- Additional Information -->
-            {{-- <h6 class="mb-4 fw-semibold text-primary border-bottom pb-2">Additional Information</h6> --}}
+          
             <div class="row g-4 mb-5">
-                {{-- <div class="col-12">
-                    <label for="notes" class="form-label fw-medium">Special Requests / Notes</label>
-                    <textarea name="notes" id="notes" rows="4"
-                              class="form-control @error('notes') is-invalid @enderror">{{ old('notes', $booking->notes ?? '') }}</textarea>
-                    @error('notes')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div> --}}
+              
 
                 <div class="col-md-6">
                     <label for="status" class="form-label fw-medium">Booking Status</label>
@@ -162,8 +155,56 @@
 
 @section('scripts')
 <script>
+    (function() {
+        'use strict';
+
+        // Helper function to format numbers as currency
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2
+            }).format(value).replace('$', ''); // Remove symbol for clean input
+        };
+
+        // DOM elements
+        const tourSelect = document.getElementById('tour_id');
+        const peopleInput = document.getElementById('people_count');
+        const totalInput = document.getElementById('total_price');
+
+        // Main calculation function
+        const calculateAndUpdateTotal = () => {
+            const selectedOption = tourSelect.options[tourSelect.selectedIndex];
+            const unitPrice = parseFloat(selectedOption.dataset.price) || 0;
+            const peopleCount = parseInt(peopleInput.value, 10) || 0;
+            const totalPrice = unitPrice * peopleCount;
+            totalInput.value = formatCurrency(totalPrice);
+        };
+
+        // Event listeners
+        tourSelect.addEventListener('change', calculateAndUpdateTotal);
+        peopleInput.addEventListener('input', calculateAndUpdateTotal);
+
+        // Initial calculation on page load
+        // Use a timeout to ensure all elements are ready, especially with autofill
+        setTimeout(calculateAndUpdateTotal, 100);
+
+        // Bootstrap custom validation
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+    })();
+
     // Bootstrap form validation
-    (function () {
+    function () {
         'use strict'
         var forms = document.querySelectorAll('.needs-validation')
         Array.prototype.slice.call(forms).forEach(function (form) {
@@ -175,6 +216,6 @@
                 form.classList.add('was-validated')
             }, false)
         })
-    })()
+    }
 </script>
 @endsection

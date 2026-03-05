@@ -56,8 +56,10 @@
                             class="form-select form-select-lg @error('tour_id') is-invalid @enderror" required>
                         <option value="">-- Choose a tour --</option>
                         @foreach ($tours as $tour)
-                            <option value="{{ $tour->id }}" {{ old('tour_id') == $tour->id ? 'selected' : '' }}>
-                                {{ $tour->name }} ({{ $tour->price ?? 'N/A' }})
+                            <option value="{{ $tour->id }}" 
+                                    data-price="{{ $tour->price ?? 0 }}"
+                                    {{ old('tour_id') == $tour->id ? 'selected' : '' }}>
+                                {{ $tour->name }} (USD {{ number_format($tour->price, 2) }})
                             </option>
                         @endforeach
                     </select>
@@ -90,9 +92,20 @@
                     <label for="total_price" class="form-label fw-medium">Total Price (USD) <span class="text-danger">*</span></label>
                     <div class="input-group input-group-lg">
                         <span class="input-group-text">$</span>
-                        <input type="number" name="total_price" id="total_price" step="0.01"
-                               class="form-control @error('total_price') is-invalid @enderror"
-                               value="{{ old('total_price') }}" required>
+                        {{-- // autu calculate  total price = people_count × tour price --}}
+                        
+                
+
+
+                        <input 
+                            type="number" 
+                            name="total_price" 
+                            id="total_price" 
+                            step="0.01"
+                            class="form-control 
+                            @error('total_price') 
+                            is-invalid @enderror"
+                            value="{{ old('total_price') }}" required>
                     </div>
                     @error('total_price')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -100,17 +113,7 @@
                 </div>
             </div>
 
-            <!-- Additional Information -->
-            {{-- <h6 class="mb-4 fw-semibold text-primary border-bottom pb-2">Additional Notes</h6>
-            <div class="mb-5">
-                <label for="notes" class="form-label fw-medium">Special Requests / Notes</label>
-                <textarea name="notes" id="notes" rows="4"
-                          class="form-control @error('notes') is-invalid @enderror">{{ old('notes') }}</textarea>
-                @error('notes')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div> --}}
-
+           
             <!-- Status -->
             <div class="mb-5">
                 <label for="status" class="form-label fw-medium">Initial Status</label>
@@ -138,19 +141,52 @@
 
 @section('scripts')
 <script>
-    // Simple client-side validation enhancement (optional)
-    (function () {
-        'use strict'
-        var forms = document.querySelectorAll('.needs-validation')
-        Array.prototype.slice.call(forms).forEach(function (form) {
-            form.addEventListener('submit', function (event) {
+    (function() {
+        'use strict';
+
+        // Helper function to format numbers as currency
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2
+            }).format(value).replace('$', ''); // Remove symbol for clean input
+        };
+
+        // DOM elements
+        const tourSelect = document.getElementById('tour_id');
+        const peopleInput = document.getElementById('people_count');
+        const totalInput = document.getElementById('total_price');
+
+        // Main calculation function
+        const calculateAndUpdateTotal = () => {
+            const selectedOption = tourSelect.options[tourSelect.selectedIndex];
+            const unitPrice = parseFloat(selectedOption.dataset.price) || 0;
+            const peopleCount = parseInt(peopleInput.value, 10) || 0;
+            const totalPrice = unitPrice * peopleCount;
+            totalInput.value = formatCurrency(totalPrice);
+        };
+
+        // Event listeners
+        tourSelect.addEventListener('change', calculateAndUpdateTotal);
+        peopleInput.addEventListener('input', calculateAndUpdateTotal);
+
+        // Initial calculation on page load
+        // Use a timeout to ensure all elements are ready, especially with autofill
+        setTimeout(calculateAndUpdateTotal, 100);
+
+        // Bootstrap custom validation
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
                 if (!form.checkValidity()) {
-                    event.preventDefault()
-                    event.stopPropagation()
+                    event.preventDefault();
+                    event.stopPropagation();
                 }
-                form.classList.add('was-validated')
-            }, false)
-        })
-    })()
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+    })();
 </script>
 @endsection

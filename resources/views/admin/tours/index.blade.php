@@ -13,30 +13,28 @@
 </div>
 
 <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+    
     <div class="card-header bg-white py-3 px-4 border-bottom">
         <div class="row g-3 align-items-center">
-            <div class="col-md-5 col-lg-4">
-            <form
-                method="GET"
-                action="{{route('admin.tours.index')}}">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
-                    <input type="text"
-                    name="search"
-                     class="form-control border-start-0" placeholder="Search tours by name..." id="searchInput">
-                </div>
-            </form>
+            <div class="col-md-12 text-md-end">
+                <form action="{{ route('admin.tours.index') }}" method="GET">
+                    <div class="d-flex gap-2 justify-content-md-end">
+                        <input type="text" name="search" class="form-control form-control-sm w-auto" placeholder="Search by name..." value="{{ request('search') }}">
+                        <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                            <option value="">All Status</option>
+                            <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
+                            <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-search"></i></button>
+                        @if(request('search') || request('status'))
+                            <a href="{{ route('admin.tours.index') }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i> Clear
+                            </a>
+                        @endif
+                    </div>
+                </form>
             </div>
-            {{-- <div class="col-md-7 col-lg-8 text-md-end">
-                <div class="d-inline-flex gap-2">
-                    <button class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-filter me-1"></i> Filter
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-download me-1"></i> Export
-                    </button>
-                </div>
-            </div> --}}
+            
         </div>
     </div>
 

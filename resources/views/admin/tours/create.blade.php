@@ -76,7 +76,8 @@
                     <label for="description" class="form-label fw-medium">Tour Description</label>
                     <textarea name="description" id="description" rows="6"
                               class="form-control @error('description') is-invalid @enderror"
-                              placeholder="Describe the tour highlights, itinerary, inclusions...">{{ old('description') }}</textarea>
+                              placeholder="Describe the tour highlights, itinerary, inclusions...">
+                              {{ old('description') ?? '' }}</textarea>
                     @error('description')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

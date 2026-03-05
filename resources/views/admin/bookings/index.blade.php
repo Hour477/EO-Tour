@@ -15,22 +15,30 @@
 <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
     <div class="card-header bg-white border-bottom py-3 px-4">
         <div class="row g-3 align-items-center">
-            <div class="col-md-5 col-lg-4">
-                <form action="{{ route('admin.bookings.index') }}" method="GET" class="d-flex">
-                    <div class="input-group input-group-sm">
-                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
-                    <input type="text" 
-                    name="search"
-                    class="form-control border-start-0" placeholder="Search by ID, name or email..." id="searchInput">
-                </div>
-
+            <div class="col-md-12 text-md-end">
+                <form action="{{ route('admin.bookings.index') }}" method="GET">
+                    <div class="d-flex gap-2 justify-content-md-end">
+                        <input type="text" name="search" class="form-control form-control-sm w-auto" placeholder="Search customer or ID..." value="{{ request('search') }}">
+                        <select name="status" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                            <option value="">All Status</option>
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-search"></i></button>
+                        @if(request('search') || request('status'))
+                            <a href="{{ route('admin.bookings.index') }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i> Clear
+                            </a>
+                        @endif
+                    </div>
                 </form>
-                
-            </div>
-            <div class="col-md-7 col-lg-8 text-md-end">
-               
             </div>
         </div>
+        
+
+
     </div>
 
     <div class="card-body p-0">
@@ -42,7 +50,7 @@
                             No
                         </th>
                         <th class="px-4 py-3">Booking ID</th>
-                        <th class="px-4 py-3">Customer</th>
+                        <th class="px-4 py-3">Customer and Email</th>
                         <th class="px-4 py-3">Tour</th>
                         <th class="px-4 py-3">People</th>
                         <th class="px-4 py-3">Date / Time</th>
@@ -112,14 +120,83 @@
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                                         <li><a class="dropdown-item" href="{{ route('admin.bookings.show', $booking->id) }}"><i class="bi bi-eye me-2"></i> View Details</a></li>
-                                        {{-- <li>
-                                            <form method="PUT" action="{{ route('admin.bookings.update', $booking->id) }}"></form>
-                                            <a class="dropdown-item text-success"
-                                            method="PUT"   
-                                            ><i class="bi bi-check-circle me-2">
-                                            </i> Confirm</a>
+                                        {{-- btn comfirm --}}
+                                        @if(strtolower($booking->status ?? 'pending') === 'pending')
+                                            <li>
+                                                <form action="{{ route('admin.bookings.update', $booking->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="status" value="confirmed">
+                                                    <input type="hidden" name="customer_name" value="{{ $booking->customer_name }}">
+                                                    <input type="hidden" name="customer_email" value="{{ $booking->customer_email }}">
+                                                    <input type="hidden" name="tour_id" value="{{ $booking->tour_id }}">
+                                                    <input type="hidden" name="people_count" value="{{ $booking->people_count }}">
+                                                    <input type="hidden" name="total_price" value="{{ $booking->total_price }}">
+                                                    <button type="submit" class="dropdown-item text-success">
+                                                        <i class="bi bi-check-circle me-2"></i> Confirm Booking
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        @endif
+                                       
+                                        @if(strtolower($booking->status ?? 'pending') === 'confirmed')
+                                            <li>
+                                                <form action="{{ route('admin.bookings.update', $booking->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="status" value="completed">
+                                                    <input type="hidden" name="customer_name" value="{{ $booking->customer_name }}">
+                                                    <input type="hidden" name="customer_email" value="{{ $booking->customer_email }}">
+                                                    <input type="hidden" name="tour_id" value="{{ $booking->tour_id }}">
+                                                    <input type="hidden" name="people_count" value="{{ $booking->people_count }}">
+                                                    <input type="hidden" name="total_price" value="{{ $booking->total_price }}">
+                                                    <button type="submit" class="dropdown-item text-info">
+                                                        <i class="bi bi-check2-all me-2"></i> Mark as Completed
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        @endif
+                                        
 
-                                        </li> --}}
+                                        @if(in_array(strtolower($booking->status ?? 'pending'), ['pending', 'confirmed']))
+                                            <li>
+                                                <form action="{{ route('admin.bookings.update', $booking->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="status" value="cancelled">
+                                                    <input type="hidden" name="customer_name" value="{{ $booking->customer_name }}">
+                                                    <input type="hidden" name="customer_email" value="{{ $booking->customer_email }}">
+                                                    <input type="hidden" name="tour_id" value="{{ $booking->tour_id }}">
+                                                    <input type="hidden" name="people_count" value="{{ $booking->people_count }}">
+                                                    <input type="hidden" name="total_price" value="{{ $booking->total_price }}">
+                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Are you sure you want to cancel this booking?')">
+                                                        <i class="bi bi-x-circle me-2"></i> Cancel Booking
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        @endif
+                                        @if(strtolower($booking->status ?? 'pending') === 'cancelled')
+                                            <li>
+                                                <form action="{{ route('admin.bookings.update', $booking->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="status" value="pending">
+                                                    <input type="hidden" name="customer_name" value="{{ $booking->customer_name }}">
+                                                    <input type="hidden" name="customer_email" value="{{ $booking->customer_email }}">
+                                                    <input type="hidden" name="tour_id" value="{{ $booking->tour_id }}">
+                                                    <input type="hidden" name="people_count" value="{{ $booking->people_count }}">
+                                                    <input type="hidden" name="total_price" value="{{ $booking->total_price }}">
+                                                    <button type="submit" class="dropdown-item text-warning">
+                                                        <i class="bi bi-arrow-counterclockwise me-2"></i> Restore to Pending
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        @endif
+                                        
+                                        
+                                        
+                                        
+                        
                                         <li><a class="dropdown-item text-primary" href="{{ route('admin.bookings.edit', $booking->id) }}"><i class="bi bi-pencil me-2"></i> Edit</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
@@ -145,22 +222,12 @@
                     @endforelse
                 </tbody>
             </table>
-            {{-- Pagination --}}
-            {{-- @if ($bookings->hasPages())
-                <div class="d-md-none p-3 border-top">
-                    {{ $bookings->links('pagination::bootstrap-5') }}
-                </div>
-            @endif --}}
-            
         </div>
-        {{-- <div class="table-responsive">
-            {{ $bookings->links() }}
-        </div> --}}
     </div>
 
     <div class="card-footer bg-white border-top py-3 px-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <small class="text-muted d-none ">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mr-3.5">
+            <small class="text-muted">
                 Showing {{ $bookings->firstItem() }}–{{ $bookings->lastItem() }} of {{ $bookings->total() }} bookings
             </small>
             {{ $bookings->links('pagination::bootstrap-5') }}

@@ -38,7 +38,7 @@
                             {{-- total booking --}}
                             {{-- @dd($totalBookings); --}}
 
-                            {{ $totalBooking ?? 0 }}
+                            {{ $totalBookings ?? 0 }}
 
                         </h4>
                     </div>
@@ -87,11 +87,27 @@
                 <div class="d-flex align-items-center">
                     <i class="bi bi-currency-dollar fs-1 me-3"></i>
                     <div>
-                        <h6 class="mb-0 small text-white-75">Tours Total</h6>
-                        <h4 class="mb-0">
-                        
-                        {{ $toursTotal ?? 0 }}
-=
+                        <h6 class="mb-0 small text-white-75">Total Amount</h6>
+                        <h4 class="mb-0"> 
+                        {{ $totalAmount ?? 0 }}
+
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card card-stat bg-secondary text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-cash-coin fs-1 me-3"></i>
+                    <div>
+                        <h6 class="mb-0 small text-white-75">Total Income</h6>
+                        <h4 class="mb-0"> 
+                        {{ $totalIncome ?? 0 }}
+
                         </h4>
                     </div>
                 </div>

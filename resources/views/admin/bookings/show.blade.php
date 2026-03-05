@@ -1,14 +1,14 @@
 {{-- resources/views/bookings/show.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Booking Details #' . str_pad($booking->id, 6, '0', STR_PAD_LEFT) . ' - EO Tour')
+@section('title', 'Booking Details #' . ($booking->id) . ' - EO Tour')
 
 @section('content')
 
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
     <h4 class="fw-bold mb-0">
         Booking Details
-        <span class="text-primary ms-2">#{{ str_pad($booking->id, 6, '0', STR_PAD_LEFT) }}</span>
+        <span class="text-primary ms-2">#{{ $booking->id }}</span>
     </h4>
     <div class="d-flex gap-2">
         <a href="{{ route('admin.bookings.index') }}" class="btn btn-outline-secondary">
@@ -71,12 +71,7 @@
                         <p class="mb-0">{{ $booking->created_at->format('d M Y • h:i A') }}</p>
                     </div>
 
-                    <div class="col-12">
-                        <label class="form-label fw-medium text-muted small">Special Notes / Requests</label>
-                        <div class="bg-light p-3 rounded border">
-                            {{ $booking->notes ?? 'No additional notes provided.' }}
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -102,15 +97,9 @@
                         </p>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-medium text-muted small">Phone Number</label>
-                        <p class="mb-0">{{ $booking->customer_phone ?? '—' }}</p>
-                    </div>
+                    
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-medium text-muted small">Nationality</label>
-                        <p class="mb-0">{{ $booking->nationality ?? '—' }}</p>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -127,14 +116,22 @@
                     <label class="form-label fw-medium text-muted small d-block">Tour Name</label>
                     <h5 class="mb-1">{{ $booking->tour->name ?? 'Tour #' . $booking->tour_id }}</h5>
                     @if ($booking->tour)
-                        <small class="text-muted">Code: {{ $booking->tour->code ?? 'N/A' }}</small>
+                        <small class="text-muted">Price: {{ number_format($booking->tour->price ?? 0, 2) }} $
+
+                        </small>
                     @endif
                 </div>
 
                 <div>
-                    <label class="form-label fw-medium text-muted small d-block">Number of People</label>
-                    <h5 class="mb-0">{{ $booking->people_count ?? 1 }} pax</h5>
+                    <label class="form-label fw-medium text-muted small d-block">
+                        Number of People and Price
+                    </label>
+                    <h5 class="mb-0">
+                        {{ $booking->people_count ?? 1 }} pax * {{ number_format($booking->tour->price ?? 0, 2) }} $
+                    </h5> 
                 </div>
+                
+                
             </div>
         </div>
 
@@ -149,12 +146,6 @@
                 </div>
 
                 <div class="small text-muted">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Status:</span>
-                        <span class="fw-medium">
-                            {{ ucfirst($booking->payment_status ?? 'Unpaid') }}
-                        </span>
-                    </div>
                     <div class="d-flex justify-content-between">
                         <span>Created:</span>
                         <span>{{ $booking->created_at->diffForHumans() }}</span>

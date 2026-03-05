@@ -11,26 +11,26 @@ class BookingController extends Controller
     // Show list of bookings (optional, you haven't defined index route)
     public function index(Request $request)
     {
+        $tours = Tour::orderBy('name')->get();
+
         $bookings = Booking::with('tour')
-
-        ->when($request->search, function ($query) use ($request) {
-                // dd($request->search);
-                // dd($request->tour_id);
+            ->when($request->search, function ($query) use ($request) {
                 $query->where('customer_name', 'LIKE', '%' . $request->search . '%')
-
-                        ->orWhere('customer_email', 'LIKE', '%' . $request->search . '%')
-                        ->orWhere('tour_id', $request->tour_id);
-
+                    ->orWhere('customer_email', 'LIKE', '%' . $request->search . '%');
+                    
+            })
+            ->when($request->status, function ($query) use ($request) {
+                $query->where('status', $request->status);
             })
             ->when($request->tour_id, function ($query) use ($request) {
-            
                 $query->where('tour_id', $request->tour_id);
             })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();  
 
-        return view('admin.bookings.index', compact('bookings'));
+            ->latest()
+            ->paginate(5)
+            ->withQueryString();
+
+        return view('admin.bookings.index', compact('bookings', 'tours'));
     }
 
     // Show create booking form
@@ -38,7 +38,9 @@ class BookingController extends Controller
 
 public function create()
 {
-    $tours = Tour::orderBy('name')->get(); // assuming you have Tour model
+    // autu calculate  total price = people_count × tour price
+
+    $tours = Tour::where('status', 'published')->orderBy('name')->get(); // assuming you have Tour model
 
     return view('admin.bookings.create', compact('tours'));
 }
@@ -48,15 +50,16 @@ public function store(Request $request)
     $validated = $request->validate([
         'customer_name'   => 'required|string|max:255',
         'customer_email'  => 'required|email|max:255',
-        'customer_phone'  => 'nullable|string|max:20',
-        'nationality'     => 'nullable|string|max:100',
         'tour_id'         => 'required|exists:tours,id',
         'booking_date'    => 'required|date',
         'people_count'    => 'required|integer|min:1',
         'total_price'     => 'required|numeric|min:0',
-        'notes'           => 'nullable|string',
         'status'          => 'in:pending,confirmed,cancelled',
     ]);
+    // autu calculate  total price = people_count × tour price
+    $tour = Tour::findOrFail($validated['tour_id']);
+    $validated['total_price'] = $tour->price * $validated['people_count'];
+    
 
     Booking::create($validated);
 
@@ -87,6 +90,10 @@ public function store(Request $request)
             // 'notes'           => 'nullable|string',
             'status'          => 'required|in:pending,confirmed,cancelled,completed',
         ]);
+        // autu calculate  total price = people_count × tour price
+        $tour = Tour::findOrFail($validated['tour_id']);
+        $validated['total_price'] = $tour->price * $validated['people_count'];
+        
         // dd($validated); //chech problem
         $booking->update($validated);
 

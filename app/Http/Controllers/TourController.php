@@ -16,24 +16,19 @@ class TourController extends Controller
     {
 
 
-         $tours = Tour::with('bookings')
+                 $tours = Tour::withCount('bookings')
 
-        ->when($request->search, function ($query) use ($request) {
-                // dd($request->search);
-                // dd($request->tour_id);
-                $query->where('name', 'LIKE', '%' . $request->search . '%');
 
-                
-
-            })
-            
-            ->latest()
-            ->paginate(5)
-            ->withQueryString();  
-
-       
-        
-
+                     ->when($request->search, function ($query, $search) {
+                         $query->where('name', 'LIKE', "%{$search}%")
+                               ->orWhere('description', 'LIKE', "%{$search}%");
+                     })
+                     ->when($request->status, function ($query, $status) {
+                        $query->where('status', $status);
+                    })
+                     ->latest()
+                     ->paginate(5)
+                     ->withQueryString();  
         return view('admin.tours.index', compact('tours'));
     }
 

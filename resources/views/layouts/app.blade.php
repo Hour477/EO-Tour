@@ -81,8 +81,11 @@
         </button>
 
         <a class="navbar-brand fw-bold" href="{{ route('admin.dashboard') }}">
-            <i class="bi bi-globe-asia-australia me-2"></i> EO Tour
+            <img src="{{ asset('logo.png') }}" alt="Logo" height="30" class="d-inline-block align-text-top">
         </a>
+
+        
+        
 
         <div class="ms-auto d-flex align-items-center gap-3">
             <span class="text-white small d-none d-md-block">{{ now()->format('d/m/Y') }}</span>
@@ -122,5 +125,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 @yield('scripts')
+
 </body>
 </html>
