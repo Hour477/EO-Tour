@@ -141,52 +141,29 @@
 
 @section('scripts')
 <script>
-    (function() {
-        'use strict';
+    $(document).ready(function () {
 
-        // Helper function to format numbers as currency
-        const formatCurrency = (value) => {
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                minimumFractionDigits: 2
-            }).format(value).replace('$', ''); // Remove symbol for clean input
-        };
+            $('#people_count, #tour_id').on('change keyup', function () {
 
-        // DOM elements
-        const tourSelect = document.getElementById('tour_id');
-        const peopleInput = document.getElementById('people_count');
-        const totalInput = document.getElementById('total_price');
+                let people_count = $('#people_count').val();
+                let tour_id = $('#tour_id').val();
 
-        // Main calculation function
-        const calculateAndUpdateTotal = () => {
-            const selectedOption = tourSelect.options[tourSelect.selectedIndex];
-            const unitPrice = parseFloat(selectedOption.dataset.price) || 0;
-            const peopleCount = parseInt(peopleInput.value, 10) || 0;
-            const totalPrice = unitPrice * peopleCount;
-            totalInput.value = formatCurrency(totalPrice);
-        };
+                $.ajax({
+                    type: "GET",
+                    url: "{{ route('admin.bookings.CalculateTotalPrice') }}",
+                    data: {
+                        people_count: people_count,
+                        tour_id: tour_id
+                    },
+                    dataType: "json",
+                    success: function (response) {
+                        let total = parseFloat(response.total_price).toFixed(2);
+                        $('#total_price').val(total);
+                    }
+                });
 
-        // Event listeners
-        tourSelect.addEventListener('change', calculateAndUpdateTotal);
-        peopleInput.addEventListener('input', calculateAndUpdateTotal);
+            });
 
-        // Initial calculation on page load
-        // Use a timeout to ensure all elements are ready, especially with autofill
-        setTimeout(calculateAndUpdateTotal, 100);
-
-        // Bootstrap custom validation
-        const forms = document.querySelectorAll('.needs-validation');
-        Array.prototype.slice.call(forms).forEach(function(form) {
-            form.addEventListener('submit', function(event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
         });
-
-    })();
 </script>
 @endsection

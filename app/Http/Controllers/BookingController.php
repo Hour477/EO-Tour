@@ -11,14 +11,18 @@ class BookingController extends Controller
     // Show list of bookings (optional, you haven't defined index route)
     public function index(Request $request)
     {
-        $tours = Tour::orderBy('name')->get();
+
+        $tours = Tour::select('id', 'name')->where('id', $request->tour_id)->get();
+
 
         $bookings = Booking::with('tour')
+        //  filter search 
             ->when($request->search, function ($query) use ($request) {
                 $query->where('customer_name', 'LIKE', '%' . $request->search . '%')
                     ->orWhere('customer_email', 'LIKE', '%' . $request->search . '%');
                     
             })
+        // Filter status
             ->when($request->status, function ($query) use ($request) {
                 $query->where('status', $request->status);
             })
@@ -33,8 +37,6 @@ class BookingController extends Controller
         return view('admin.bookings.index', compact('bookings', 'tours'));
     }
 
-    // Show create booking form
-    // app/Http/Controllers/BookingController.php
 
 public function create()
 {
@@ -112,5 +114,20 @@ public function store(Request $request)
     {
         $booking->delete();
         return redirect()->route('admin.bookings.create')->with('success', 'Booking deleted successfully.');
+    }
+
+
+//  autu calculate
+    public function  CalculateTotalPrice(Request $request){
+        $tour = Tour::find($request->tour_id);
+
+    if (!$tour) {
+        return response()->json(['total_price' => 0]);
+    }
+
+    $total = $tour->price * $request->people_count;
+    return response()->json([
+        'total_price' => $total
+    ]);
     }
 }

@@ -33,6 +33,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         return view('admin.bookings.index');
     })->name('admin.bookings.index');
 
+    // auto 
+    Route::get('/admin/booking/CalculateTotalPrice', [BookingController::class,'CalculateTotalPrice'])->name('admin.bookings.CalculateTotalPrice');
+
     Route::get('/admin/booking', [BookingController::class, 'index'])->name('admin.bookings.index');
     Route::get('/admin/booking/show/{booking}', [BookingController::class, 'show'])->name('admin.bookings.show');
     Route::get('/admin/booking/create', [BookingController::class, 'create'])->name('admin.bookings.create');

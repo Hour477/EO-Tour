@@ -15,9 +15,9 @@ class Booking extends Model
         'total_price',
         'booking_date',
         'status'
-        
-        
     ];
+
+    
     // relation public function tour()
     // Booking.php
     public function tour() {

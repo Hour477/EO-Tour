@@ -154,7 +154,36 @@
 @endsection
 
 @section('scripts')
+
+
 <script>
+        $(document).ready(function () {
+
+            $('#people_count, #tour_id').on('change keyup', function () {
+
+                let people_count = $('#people_count').val();
+                let tour_id = $('#tour_id').val();
+
+                $.ajax({
+                    type: "GET",
+                    url: "{{ route('admin.bookings.CalculateTotalPrice') }}",
+                    data: {
+                        people_count: people_count,
+                        tour_id: tour_id
+                    },
+                    dataType: "json",
+                    success: function (response) {
+                        let total = parseFloat(response.total_price).toFixed(2);
+                        $('#total_price').val(total);
+                    }
+                });
+
+            });
+
+        });
+</script>
+{{-- <script>
+
     (function() {
         'use strict';
 
@@ -217,5 +246,5 @@
             }, false)
         })
     }
-</script>
+</script> --}}
 @endsection

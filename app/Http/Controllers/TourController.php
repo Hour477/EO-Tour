@@ -16,19 +16,18 @@ class TourController extends Controller
     {
 
 
-                 $tours = Tour::withCount('bookings')
+        $tours = Tour::withCount('bookings')
 
-
-                     ->when($request->search, function ($query, $search) {
-                         $query->where('name', 'LIKE', "%{$search}%")
-                               ->orWhere('description', 'LIKE', "%{$search}%");
-                     })
-                     ->when($request->status, function ($query, $status) {
-                        $query->where('status', $status);
-                    })
-                     ->latest()
-                     ->paginate(5)
-                     ->withQueryString();  
+            ->when($request->search, function ($query, $search) {
+                $query->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('description', 'LIKE', "%{$search}%");
+            })
+            ->when($request->status, function ($query, $status) {
+            $query->where('status', $status);
+        })
+            ->latest()
+            ->paginate(5)
+            ->withQueryString();  
         return view('admin.tours.index', compact('tours'));
     }
 
@@ -86,6 +85,7 @@ public function edit(Tour $tour)
 
     public function update(Request $request, Tour $tour)
     {
+        
         $validated = $request->validate([
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
